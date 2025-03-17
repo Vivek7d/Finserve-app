@@ -296,6 +296,8 @@ export default function QueryHandling() {
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [selectedQuery, setSelectedQuery] = useState(null);
   const [showQueryDetails, setShowQueryDetails] = useState(false);
+  const [chatMessages, setChatMessages] = useState({});
+  const [newMessage, setNewMessage] = useState("");
 
   // Filter options
   const typeOptions = [
@@ -541,6 +543,25 @@ export default function QueryHandling() {
   const closeDetailView = () => {
     setShowQueryDetails(false);
     setSelectedQuery(null);
+  };
+
+  // Handle sending a chat message
+  const handleSendMessage = (queryId) => {
+    if (!newMessage.trim()) return;
+
+    const newChatMessage = {
+      id: Date.now(),
+      message: newMessage,
+      sender: "agent",
+      timestamp: new Date().toISOString(),
+    };
+
+    setChatMessages((prev) => ({
+      ...prev,
+      [queryId]: [...(prev[queryId] || []), newChatMessage],
+    }));
+
+    setNewMessage("");
   };
 
   return (
@@ -972,6 +993,60 @@ export default function QueryHandling() {
                   </button>
                   <button className="flex-1 py-2 bg-white border border-red-500 text-red-700 rounded hover:bg-red-50 flex items-center justify-center">
                     Escalate Query
+                  </button>
+                </div>
+              </div>
+
+              {/* Chat Section */}
+              <div className="bg-white p-4 rounded-md mb-6 border border-gray-200">
+                <h4 className="text-gray-800 font-medium mb-3 flex items-center">
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Live Chat
+                </h4>
+
+                <div className="h-[300px] overflow-y-auto mb-4 p-4 bg-gray-50 rounded-md">
+                  {(chatMessages[selectedQuery.id] || []).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex mb-3 ${
+                        msg.sender === "agent" ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                          msg.sender === "agent"
+                            ? "bg-indigo-600 text-white"
+                            : "bg-gray-200 text-gray-800"
+                        }`}
+                      >
+                        <p className="text-sm">{msg.message}</p>
+                        <span className="text-xs opacity-75 mt-1 block">
+                          {new Date(msg.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter") {
+                        handleSendMessage(selectedQuery.id);
+                      }
+                    }}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  <button
+                    onClick={() => handleSendMessage(selectedQuery.id)}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center"
+                  >
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Send
                   </button>
                 </div>
               </div>

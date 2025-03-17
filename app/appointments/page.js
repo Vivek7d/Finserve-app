@@ -30,6 +30,7 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { useRouter } from "next/navigation";
 
 const consultationTypes = [
   {
@@ -172,6 +173,25 @@ const financialAdvisors = [
     },
   },
   {
+    id: 7,
+    name: "Mr. Aditya Kumar",
+    specialty: "Loan & Mortgage Guidance",
+    rating: 4.9,
+    reviews: 150,
+    experience: "10 years",
+    languages: ["English", "Hindi", "Telugu"],
+    email: "aditya.kumar@finserve.com",
+    phone: "+91 98765 43216",
+    bio: "Expert in loan and mortgage consultation with extensive experience in home loans, business loans, and debt restructuring.",
+    availability: {
+      monday: ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"],
+      tuesday: ["10:00 AM - 01:00 PM", "03:00 PM - 06:00 PM"],
+      wednesday: ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"],
+      thursday: ["10:00 AM - 01:00 PM", "03:00 PM - 06:00 PM"],
+      friday: ["09:00 AM - 12:00 PM", "02:00 PM - 05:00 PM"],
+    },
+  },
+  {
     id: 4,
     name: "Ms. Anjali Desai",
     specialty: "Estate Planning",
@@ -276,7 +296,7 @@ const feedbackSessions = [
   {
     id: 1,
     advisor: "Mr. Rajesh Sharma",
-    date: "2023-05-15",
+    date: "2024-03-10",
     time: "10:00 AM - 11:00 AM",
     type: "Investment Planning",
     rating: 5,
@@ -286,7 +306,7 @@ const feedbackSessions = [
   {
     id: 2,
     advisor: "Ms. Priya Patel",
-    date: "2023-05-10",
+    date: "2024-03-12",
     time: "02:00 PM - 03:00 PM",
     type: "Tax Consultation",
     rating: 4,
@@ -296,12 +316,22 @@ const feedbackSessions = [
   {
     id: 3,
     advisor: "Mr. Vikram Singh",
-    date: "2023-05-20",
+    date: "2024-03-15",
     time: "11:00 AM - 12:00 PM",
     type: "Retirement Planning",
     rating: 5,
     feedback:
-      "Mr. Singh provided exceptional guidance on retirement planning. His strategies were tailored to my specific needs and long-term goals. I feel much more confident about my financial future now.",
+      "Mr. Singh provided exceptional guidance on retirement planning. His strategies were tailored to my specific needs and long-term goals.",
+  },
+  {
+    id: 4,
+    advisor: "Mr. Aditya Kumar",
+    date: "2024-03-14",
+    time: "03:00 PM - 04:00 PM",
+    type: "Loan & Mortgage Guidance",
+    rating: 5,
+    feedback:
+      "Mr. Kumar provided excellent guidance on home loan options and helped me understand the best mortgage rates available. Very professional and knowledgeable!",
   },
 ];
 
@@ -311,6 +341,8 @@ const poppins = Poppins({
 });
 
 export default function page() {
+  const router = useRouter();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedConsultationType, setSelectedConsultationType] =
     useState(null);
@@ -319,6 +351,7 @@ export default function page() {
   const [assignedAdvisor, setAssignedAdvisor] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
   const [appointments, setAppointments] = useState(existingAppointments);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [rescheduleId, setRescheduleId] = useState(null);
@@ -453,7 +486,7 @@ export default function page() {
   };
 
   const handleBookAppointment = async () => {
-    if (assignedAdvisor && selectedDate && selectedTime) {
+    if (assignedAdvisor && selectedDate && selectedTime && selectedLanguage) {
       const newAppointment = {
         advisor: assignedAdvisor.name,
         date: selectedDate,
@@ -463,7 +496,9 @@ export default function page() {
         bookingType: selectedBookingType.name,
         createdAt: new Date().toISOString(),
         advisorDetails: assignedAdvisor,
-        selectedBranch: selectedBookingType.name === "Visit Branch" ? selectedBranch : null,
+        selectedBranch:
+          selectedBookingType.name === "Visit Branch" ? selectedBranch : null,
+        language: selectedLanguage,
       };
 
       try {
@@ -486,6 +521,7 @@ export default function page() {
         setAssignedAdvisor(null);
         setSelectedDate("");
         setSelectedTime("");
+        setSelectedLanguage("");
         setStep(1);
 
         toast.success("Appointment booked successfully!");
@@ -494,7 +530,9 @@ export default function page() {
         toast.error("Failed to book appointment");
       }
     } else {
-      toast.error("Please select date and time for your appointment");
+      toast.error(
+        "Please select date, time, and language preference for your appointment"
+      );
     }
   };
 
@@ -738,7 +776,7 @@ export default function page() {
                     selectedBookingType?.name === "Visit Branch" && (
                       <div>
                         <h3 className="text-lg font-medium mb-4">
-                          Step 3: Select Branch
+                          Nearest Branches
                         </h3>
                         <div className="grid gap-6 md:grid-cols-2">
                           {bankBranches.map((branch) => (
@@ -749,7 +787,6 @@ export default function page() {
                                   ? "ring-2 ring-blue-500"
                                   : "hover:shadow-lg"
                               }`}
-                              onClick={() => handleBranchSelect(branch.id)}
                             >
                               <CardContent className="p-6">
                                 <h3 className="text-lg font-semibold mb-2">
@@ -766,21 +803,24 @@ export default function page() {
                             </Card>
                           ))}
                         </div>
-                        <div className="mt-4 flex justify-between">
-                          <Button variant="outline" onClick={() => setStep(2)}>
+                        {/* <div className="mt-4 flex justify-between">
+                          <Button
+                            variant="outline"
+                            onClick={() => router.push("appointments")}
+                          >
                             Back
                           </Button>
-                        </div>
+                        </div> */}
                       </div>
                     )}
 
                   {step === 4 && (
                     <div className="space-y-6">
                       <h3 className="text-lg font-medium mb-4">
-                        Step 4: Select Date and Time
+                        Select Date, Time and Language Preference
                       </h3>
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
                           <label className="text-sm font-medium mb-1 text-gray-700">
                             Select Date
                           </label>
@@ -792,7 +832,7 @@ export default function page() {
                             min={new Date().toISOString().split("T")[0]}
                           />
                         </div>
-                        <div className="flex-1">
+                        <div>
                           <label className="text-sm font-medium mb-1 text-gray-700">
                             Select Time Slot
                           </label>
@@ -807,6 +847,27 @@ export default function page() {
                                 {slot}
                               </option>
                             ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium mb-1 text-gray-700">
+                            Preferred Language
+                          </label>
+                          <select
+                            className="w-full border rounded-md py-2 px-4 bg-white"
+                            value={selectedLanguage}
+                            onChange={(e) =>
+                              setSelectedLanguage(e.target.value)
+                            }
+                          >
+                            <option value="">Select Language</option>
+                            {assignedAdvisor?.languages.map(
+                              (language, index) => (
+                                <option key={index} value={language}>
+                                  {language}
+                                </option>
+                              )
+                            )}
                           </select>
                         </div>
                       </div>
@@ -881,43 +942,6 @@ export default function page() {
                                   <p className="text-sm text-gray-600">
                                     {appointment.advisorDetails?.specialty}
                                   </p>
-                                  <div className="flex items-center mt-1">
-                                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                                    <span className="text-sm ml-1">
-                                      {appointment.advisorDetails?.rating} (
-                                      {appointment.advisorDetails?.reviews}{" "}
-                                      reviews)
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
-                                <div>
-                                  <p className="font-medium">Experience</p>
-                                  <p className="text-gray-600">
-                                    {appointment.advisorDetails?.experience}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="font-medium">Languages</p>
-                                  <p className="text-gray-600">
-                                    {appointment.advisorDetails?.languages.join(
-                                      ", "
-                                    )}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="font-medium">Email</p>
-                                  <p className="text-gray-600">
-                                    {appointment.advisorDetails?.email}
-                                  </p>
-                                </div>
-                                <div>
-                                  <p className="font-medium">Phone</p>
-                                  <p className="text-gray-600">
-                                    {appointment.advisorDetails?.phone}
-                                  </p>
                                 </div>
                               </div>
                             </div>
@@ -935,64 +959,60 @@ export default function page() {
                               </div>
                             </div>
 
-                            {appointment.bookingType === "Chat" && (
-                              <div className="mt-4">
-                                <div className="border rounded-lg p-4 bg-gray-50">
-                                  <div className="space-y-4 mb-4 max-h-40 overflow-y-auto">
-                                    {(chatMessages[appointment.id] || []).map(
-                                      (msg, idx) => (
+                            <div className="mt-4">
+                              <div className="border rounded-lg p-4 bg-gray-50">
+                                <div className="space-y-4 mb-4 max-h-40 overflow-y-auto">
+                                  {(chatMessages[appointment.id] || []).map(
+                                    (msg, idx) => (
+                                      <div
+                                        key={idx}
+                                        className={`flex ${
+                                          msg.sentBy === "client"
+                                            ? "justify-end"
+                                            : "justify-start"
+                                        }`}
+                                      >
                                         <div
-                                          key={idx}
-                                          className={`flex ${
+                                          className={`rounded-lg px-4 py-2 max-w-[80%] ${
                                             msg.sentBy === "client"
-                                              ? "justify-end"
-                                              : "justify-start"
+                                              ? "bg-blue-500 text-white"
+                                              : "bg-gray-200"
                                           }`}
                                         >
-                                          <div
-                                            className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                                              msg.sentBy === "client"
-                                                ? "bg-blue-500 text-white"
-                                                : "bg-gray-200"
-                                            }`}
-                                          >
-                                            {msg.message}
-                                          </div>
+                                          {msg.message}
                                         </div>
-                                      )
-                                    )}
-                                  </div>
-                                  <div className="flex gap-2">
-                                    <Input
-                                      placeholder="Type your message..."
-                                      value={message}
-                                      onChange={(e) =>
-                                        setMessage(e.target.value)
-                                      }
-                                      onKeyPress={(e) => {
-                                        if (e.key === "Enter") {
-                                          handleSendMessage(
-                                            appointment.advisorDetails.id,
-                                            appointment.id
-                                          );
-                                        }
-                                      }}
-                                    />
-                                    <Button
-                                      size="sm"
-                                      onClick={() =>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                                <div className="flex gap-2">
+                                  <Input
+                                    placeholder="Type your message..."
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    onKeyPress={(e) => {
+                                      if (e.key === "Enter") {
                                         handleSendMessage(
                                           appointment.advisorDetails.id,
                                           appointment.id
-                                        )
+                                        );
                                       }
-                                    >
-                                      Send
-                                    </Button>
-                                  </div>
+                                    }}
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() =>
+                                      handleSendMessage(
+                                        appointment.advisorDetails.id,
+                                        appointment.id
+                                      )
+                                    }
+                                  >
+                                    Send
+                                  </Button>
                                 </div>
                               </div>
-                            )}
+                            </div>
 
                             {rescheduleId === appointment.id ? (
                               <div className="mt-4 space-y-4">
@@ -1080,59 +1100,69 @@ export default function page() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-col gap-4">
-                    {appointments
-                      .filter(
-                        (appointment) => new Date(appointment.date) < new Date()
-                      )
-                      .map((session) => (
-                        <Card key={session.id}>
-                          <CardContent className="p-4">
-                            <div className="flex items-center justify-between mb-4">
-                              <div>
-                                <h3 className="text-lg font-semibold">
-                                  {session.advisor} - {session.type}
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                  <Calendar className="inline mr-2 h-4 w-4" />
-                                  {new Date(session.date).toLocaleDateString()}
-                                  <Clock className="inline ml-4 mr-2 h-4 w-4" />
-                                  {session.time}
-                                </p>
-                              </div>
-                              <div className="flex items-center">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <Star
-                                    key={star}
-                                    className={`h-6 w-6 cursor-pointer ${
-                                      star <= (session.rating || 0)
-                                        ? "text-yellow-400 fill-current"
-                                        : "text-gray-300"
-                                    }`}
-                                    onClick={() =>
-                                      handleRating(session.id, star)
-                                    }
-                                  />
-                                ))}
-                              </div>
+                    {pastSessions.map((session) => (
+                      <Card key={session.id}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h3 className="text-lg font-semibold">
+                                {session.advisor} - {session.type}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                <Calendar className="inline mr-2 h-4 w-4" />
+                                {new Date(session.date).toLocaleDateString()}
+                                <Clock className="inline ml-4 mr-2 h-4 w-4" />
+                                {session.time}
+                              </p>
                             </div>
-                            <Textarea
-                              className="w-full p-2 border rounded-md"
-                              rows={4}
-                              placeholder="Share your thoughts about the session..."
-                              value={session.feedback || ""}
-                              onChange={(e) =>
-                                handleFeedback(session.id, e.target.value)
-                              }
-                            />
-                            <Button
-                              className="mt-4"
-                              onClick={() => handleSubmitFeedback(session.id)}
-                            >
-                              Submit Feedback
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      ))}
+                            <div className="flex items-center">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-6 w-6 cursor-pointer ${
+                                    star <= (session.rating || 0)
+                                      ? "text-yellow-400 fill-current"
+                                      : "text-gray-300"
+                                  }`}
+                                  onClick={() => {
+                                    setPastSessions(
+                                      pastSessions.map((s) =>
+                                        s.id === session.id
+                                          ? { ...s, rating: star }
+                                          : s
+                                      )
+                                    );
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <Textarea
+                            className="w-full p-2 border rounded-md"
+                            rows={4}
+                            placeholder="Share your thoughts about the session..."
+                            value={session.feedback || ""}
+                            onChange={(e) => {
+                              setPastSessions(
+                                pastSessions.map((s) =>
+                                  s.id === session.id
+                                    ? { ...s, feedback: e.target.value }
+                                    : s
+                                )
+                              );
+                            }}
+                          />
+                          <Button
+                            className="mt-4"
+                            onClick={() => {
+                              toast.success("Feedback submitted successfully!");
+                            }}
+                          >
+                            Submit Feedback
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
