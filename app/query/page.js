@@ -169,25 +169,6 @@ export default function QuerySubmission() {
                       </div>
 
                       <div>
-                        <Label className="text-base font-medium mb-2 block">Priority Level</Label>
-                        <RadioGroup 
-                          value={priority} 
-                          onValueChange={setPriority}
-                          className="flex flex-col space-y-2"
-                        >
-                          {Object.entries(priorityLabels).map(([value, label]) => (
-                            <div key={value} className={`flex items-center space-x-2 p-3 rounded-lg border ${priority === value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}>
-                              <RadioGroupItem value={value} id={`priority-${value}`} />
-                              <Label htmlFor={`priority-${value}`} className="flex items-center cursor-pointer">
-                                {priorityIcons[value]}
-                                <span className="ml-2">{label}</span>
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
-                      </div>
-
-                      <div>
                         <Label className="text-base font-medium mb-2 block">Query Type</Label>
                         <div className="flex flex-wrap gap-3 mb-4">
                           <Button
