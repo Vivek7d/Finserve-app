@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import Link from 'next/link' // Import Link for navigation
-import { Camera, User, Shield } from "lucide-react"
+import { Camera, User, Shield, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -140,6 +140,19 @@ export default function FacialAuthentication() {
     }, 3000);
   }
 
+  const handleStandardLogin = () => {
+    // Show success toast notification
+    toast.success("Login successful!", {
+      duration: Infinity,
+      position: 'top-right',
+    });
+    
+    // Delay navigation for 2 seconds
+    setTimeout(() => {
+      window.location.href = "/dashboard"; // Redirect to dashboard after 2 seconds
+    }, 2000);
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 to-purple-600">
       <Card className="w-full max-w-md shadow-lg">
@@ -148,10 +161,14 @@ export default function FacialAuthentication() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="user" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="user" className="flex items-center justify-center">
                 <User className="w-4 h-4 mr-2" />
                 User Login
+              </TabsTrigger>
+              <TabsTrigger value="standard" className="flex items-center justify-center">
+                <Mail className="w-4 h-4 mr-2" />
+                Standard Login
               </TabsTrigger>
               <TabsTrigger value="admin" className="flex items-center justify-center">
                 <Shield className="w-4 h-4 mr-2" />
@@ -195,6 +212,37 @@ export default function FacialAuthentication() {
                 onClick={handleFaceLogin}
               >
                 Confirm Identity
+              </Button>
+            </TabsContent>
+            
+            <TabsContent value="standard" className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="standard-username" className="block text-sm font-medium">
+                  Username
+                </label>
+                <input
+                  id="standard-username"
+                  type="text"
+                  className="w-full p-2 border rounded-md"
+                  placeholder="Enter username"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="standard-password" className="block text-sm font-medium">
+                  Password
+                </label>
+                <input
+                  id="standard-password"
+                  type="password"
+                  className="w-full p-2 border rounded-md"
+                  placeholder="Enter password"
+                />
+              </div>
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700" 
+                onClick={handleStandardLogin}
+              >
+                Login
               </Button>
             </TabsContent>
             
